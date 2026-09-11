@@ -28,9 +28,8 @@ builder.Services.AddDbContext<AppDbContext>(o =>
         o.UseSqlite($"Data Source={Path.Combine(dataDir, "lockscreens.db")}");
 });
 
-builder.Services.AddRazorPages(o => o.Conventions.AuthorizeFolder("/Review", "Admin"));
+builder.Services.AddRazorPages();
 builder.Services.AddHttpClient();
-builder.Services.AddScoped<GitHubContentService>();
 builder.Services.AddScoped<RegistrySync>();
 builder.Services.AddHostedService<RegistrySyncService>();
 
@@ -41,8 +40,10 @@ builder.Services.Configure<ForwardedHeadersOptions>(o =>
     o.KnownProxies.Clear();
 });
 
-// Single-admin login: a key from config, no GitHub, no user accounts. Visitors
-// never log in — they browse and "apply" by opening a GitHub issue.
+// Single-admin login: a key from config, no GitHub, no user accounts. It
+// guards /admin/sync, which is the only thing an admin does here now --
+// designs arrive by pull request and are listed by the registry sync, so
+// there is nothing to approve after the fact. Visitors never log in.
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(o =>
     {
@@ -151,7 +152,7 @@ app.MapPost("/admin/login", async (HttpContext ctx, IConfiguration config, [Micr
         [new Claim(ClaimTypes.Name, "admin"), new Claim(ClaimTypes.Role, "admin")],
         CookieAuthenticationDefaults.AuthenticationScheme);
     await ctx.SignInAsync(new ClaimsPrincipal(identity));
-    return Results.Redirect("/review");
+    return Results.Redirect("/");
 }).DisableAntiforgery();
 
 app.MapPost("/admin/logout", async (HttpContext ctx) =>

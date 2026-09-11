@@ -1,9 +1,11 @@
 # Uploads the publish/ folder to Simply.com over FTP.
-# Usage:  .\deploy-ftp.ps1 -Password '<your FTP password>'
-# FTP host/user/folder come from the Simply "Get started" page.
+# Usage:  .\deploy-ftp.ps1 -User '<your FTP user>' -Password '<your FTP password>'
+# FTP host/user/folder all come from the Simply "Get started" page. The user is
+# a parameter rather than a default because this repository is public, and a
+# hardcoded username is half of a credential pair.
 param(
   [string]$FtpHost = 'ftp.simply.com',
-  [string]$User    = 'omarchycommuni.org',
+  [Parameter(Mandatory=$true)][string]$User,
   [Parameter(Mandatory=$true)][string]$Password,
   [string]$Remote  = '/public_html',
   [string]$Local   = "$PSScriptRoot\publish"

@@ -6,7 +6,7 @@
     var v = Model.Design.LiveVersion;
     var files = v is null ? [] : JsonSerializer.Deserialize<List<Dictionary<string, JsonElement>>>(v.FilesJson) ?? [];
     long totalSize = files.Sum(f => f.TryGetValue("size", out var s) ? s.GetInt64() : 0);
-    var reportUrl = "https://github.com/SirJul1337/omarchy-lock-explorer/issues/new?title=" +
+    var reportUrl = "https://github.com/SirJul1337/omarchy-lockscreens/issues/new?title=" +
         Uri.EscapeDataString($"[report] {Model.Design.Name} ({Model.Design.PublicId})");
 }
 

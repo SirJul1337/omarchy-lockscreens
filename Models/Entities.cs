@@ -6,7 +6,7 @@ public enum DesignStatus { Pending, Approved, Rejected, Revoked, Unlisted }
 public enum DesignKind { Static, Video }
 public enum ScanVerdict { None, Pass, Warn, Fail }
 
-// No visitor accounts: submissions arrive as GitHub issues and the maintainer
+// No visitor accounts: submissions arrive as pull requests and the maintainer
 // curates them in (Omarchy-plugins style). "Owner" is just the submitter's
 // GitHub handle, stored as text — there is no user table and no user login.
 public class Design
@@ -26,7 +26,6 @@ public class Design
     /// <summary>Kept here rather than in the repo: it changes without anyone
     /// opening a pull request, which is the line between the two.</summary>
     public int Likes { get; set; }
-    [MaxLength(200)] public string? IssueUrl { get; set; }       // the GitHub issue it came from
     public List<DesignVersion> Versions { get; set; } = [];
 
     public string[] TagList => Tags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);

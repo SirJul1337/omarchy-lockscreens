@@ -25,7 +25,6 @@ public static class SeedData
                 Name = name, Description = desc, Tags = tags, Kind = kind,
                 Status = DesignStatus.Approved, OwnerLogin = Author, Installs = installs,
                 CreatedUtc = DateTime.UtcNow.AddDays(-Random.Shared.Next(3, 40)),
-                IssueUrl = $"{Repo}/issues",
             };
             var sha = Convert.ToHexStringLower(System.Security.Cryptography.RandomNumberGenerator.GetBytes(20));
             d.Versions.Add(new DesignVersion

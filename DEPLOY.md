@@ -21,48 +21,48 @@ no manual step. Upload the folder with the FTP/SFTP credentials from your Simply
 control panel (or Web Deploy from Visual Studio — Deployment Mode
 *Self-contained*, Target Runtime *win-x86*).
 
-The app self-creates its SQLite database at `App_Data/lockscreens.db` on first
-run. That folder has full write access on Simply (support article 261). **Do
-not upload a local `App_Data`** — let production start empty. Back the file up
-periodically; it holds every design, vote and report.
+Locally the app keeps a SQLite database under `App_Data/`; **production uses
+the MySQL database from your Simply control panel** (section 2). Either way,
+**do not upload a local `App_Data`** — it is developer data and production
+creates its own schema on first run.
 
-## 2. Secrets — set these on the server, never in the repo
+The designs themselves are not in the database and are not uploaded: the
+registry sync fetches them from the repository and mirrors them into
+`wwwroot/designs/` on the server. So a merged design goes live on the next
+poll without a redeploy, and an empty gallery right after deploying just means
+the first sync has not run yet (it runs ten seconds after start, then every
+`Registry:SyncMinutes`).
+
+## 2. Configuration — set this on the server, never in the repo
 
 Create/edit **`appsettings.Production.json`** in the site root on the server
-(it is not in source control) and fill in:
+(it is not in source control):
 
 ```json
 {
-  "Admins": [ "SirJul1337" ],
-  "GitHub": {
-    "ClientId": "<from your GitHub OAuth app>",
-    "ClientSecret": "<from your GitHub OAuth app>",
-    "ApiToken": "<optional PAT, raises the GitHub API rate limit>"
-  }
+  "ConnectionStrings": {
+    "MySql": "Server=...;Port=3306;Database=...;User ID=...;Password=...;SslMode=Preferred;"
+  },
+  "Admin": { "Key": "<a long random string>" }
 }
 ```
 
-- **Admins** is the list of GitHub logins that can reach `/review`.
-- **GitHub:ApiToken** is optional. Without it the site uses GitHub's anonymous
-  API limit (60/hour) to resolve commits — fine at low volume. A classic PAT
-  with **no scopes** (public read only) raises it to 5000/hour.
+- **ConnectionStrings:MySql** comes from the Simply control panel.
+- **Admin:Key** is the single maintainer login, used at `/admin/login` to reach
+  `/admin/sync`. The shipped default in `appsettings.json` is **empty on
+  purpose**: with no key set, every login is refused rather than a guessable
+  one being accepted. So if you do not set this, there is no admin — which is
+  safe, just inconvenient.
 
-## 3. GitHub OAuth app (for sign-in)
+`Registry:IndexUrl` and `Registry:RepoUrl` are already set in
+`appsettings.json` and need nothing on the server. Note the index is fetched
+anonymously from `raw.githubusercontent.com`, so **the repository has to be
+public** for the sync to work.
 
-At <https://github.com/settings/developers> → New OAuth App:
+There is no OAuth and there are no user accounts. Nobody signs in but you, and
+designs arrive by pull request rather than through the site.
 
-- Homepage URL: `https://omarchycommunity.org`
-- Authorization callback URL: `https://omarchycommunity.org/signin-github`
-
-Copy the Client ID and generate a Client Secret into
-`appsettings.Production.json` as above. The app requests **no scopes** — only
-the public profile (login + avatar), nothing else.
-
-Until these are set, sign-in shows a "not configured yet" message and the
-public pages + registry still work. (Locally, `dotnet run` in Development also
-exposes `/dev/login?user=NAME` so the flows can be tested without OAuth.)
-
-## 4. The CDN — Cloudflare free plan (nothing to buy)
+## 3. The CDN — Cloudflare free plan (nothing to buy)
 
 The registry endpoint and static assets already send
 `Cache-Control: public, max-age=300, stale-while-revalidate=3600` and an ETag,
@@ -90,28 +90,32 @@ below.
 conditional GETs from the plugin keep origin load low, and the site failing
 briefly is harmless because the plugin fails open on its cached copy.
 
-## 5. Why it can't be abused (recap, since the plugin is open source)
+## 4. Why it can't be abused (recap, since everything is public)
 
 - **Reads** (`/api/v1/registry.json`, previews) are anonymous and cached — the
   CDN serves them, so volume can't hurt the origin. No API key is shipped in
   the plugin (it would be public within minutes and buy nothing).
-- **Writes** (vote, report, submit) all require a GitHub sign-in, with
-  per-account quotas (submits/day, reports/day, one vote per design) enforced
-  in the app. Spamming writes costs the attacker GitHub accounts, not you.
+- **There is no public write path at all.** Submitting is a pull request on
+  GitHub, so review, rate limiting and abuse handling are GitHub's problem
+  rather than something running here. The only authenticated endpoint is
+  `/admin/sync`, behind the single admin key.
 - **Per-IP backstop**: a 120 req/min sliding window. Behind Cloudflare the real
   client IP is in `CF-Connecting-IP`/`X-Forwarded-For`; to partition the limiter
   on it, add Cloudflare's IP ranges to `KnownProxies` in `Program.cs` (left open
   by default so it degrades to a global limiter rather than trusting a spoofable
-  header). The CDN cache and the OAuth gate are the real defenses; this is only
-  a backstop.
-- **Revocation**: revoking or auto-unlisting a design drops it from
-  `registry.json` immediately; with the 5-minute cache TTL the plugin stops
-  offering it within minutes.
+  header). The CDN cache and having no write path are the real defenses; this
+  is only a backstop.
+- **Revocation**: delete the design's folder from the repository. The next
+  sync notices it has gone, unlists it, and it leaves `registry.json` within
+  the cache window.
 
-## 6. Health check after deploy
+## 5. Health check after deploy
 
 - `https://omarchycommunity.org/` — landing page renders.
 - `https://omarchycommunity.org/api/v1/registry.json` — returns JSON with the
   cache header (empty `designs` array until something is approved).
-- Sign in with GitHub, submit a design, approve it at `/review`, confirm it
-  appears in the registry within the cache window.
+- `https://omarchycommunity.org/designs` — the designs listed, each with its
+  preview. If it is empty, check the log for the sync: an unreachable or
+  unparseable index leaves the database untouched rather than emptying it.
+- Merge a design into `Designs/`, wait for the index workflow, and confirm it
+  appears within `Registry:SyncMinutes`.

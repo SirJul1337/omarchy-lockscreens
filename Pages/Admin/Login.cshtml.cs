@@ -9,7 +9,7 @@ public class LoginModel : PageModel
 
     public IActionResult OnGet()
     {
-        if (User.IsInRole("admin")) return Redirect("/review");
+        if (User.IsInRole("admin")) return Redirect("/");
         return Page();
     }
 }
