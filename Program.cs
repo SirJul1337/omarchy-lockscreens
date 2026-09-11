@@ -167,7 +167,12 @@ app.MapGet("/api/v1/registry.json", async (HttpContext ctx, AppDbContext db) =>
 {
     var designs = await db.Designs
         .AsNoTracking()
-        .Where(d => d.Status == DesignStatus.Approved && d.LiveVersion != null)
+        // Community designs only: a built-in is already installed, has no
+        // mirrored file behind it, and the seeded rows carry a random hash, so
+        // listing one would give the plugin an entry that cannot pass the very
+        // check that is meant to protect the user.
+        .Where(d => d.Status == DesignStatus.Approved && d.LiveVersion != null
+                 && d.LiveVersion.ReviewedBy == RegistrySync.SyncActor)
         .Include(d => d.LiveVersion)
         .OrderByDescending(d => d.Likes)
         .ThenBy(d => d.PublicId)

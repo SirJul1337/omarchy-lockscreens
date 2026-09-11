@@ -15,6 +15,7 @@ public class IndexModel(AppDbContext db) : PageModel
         DesignCount = await db.Designs.CountAsync(d => d.Status == DesignStatus.Approved);
         Featured = await db.Designs
             .AsNoTracking()
+            .Include(d => d.LiveVersion)
             .Where(d => d.Status == DesignStatus.Approved)
             .OrderByDescending(d => d.CreatedUtc)
             .Take(3)

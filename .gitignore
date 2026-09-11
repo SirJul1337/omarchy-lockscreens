@@ -13,3 +13,7 @@ wwwroot/designs/
 
 # Screenshots taken for sharing, not part of the site.
 site-gallery.png
+
+# Deployment artifacts, built on demand.
+publish-deploy/
+deploy.zip

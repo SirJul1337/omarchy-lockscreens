@@ -23,6 +23,14 @@ public class DetailModel(AppDbContext db, IWebHostEnvironment env) : PageModel
     public string? QmlText { get; private set; }
     public string? QmlFileName { get; private set; }
 
+    /// <summary>Ships with the plugin rather than arriving by pull request.</summary>
+    /// <remarks>
+    /// There is nothing to install for one of these: it is already on the
+    /// machine if the plugin is. They are listed because this is a directory
+    /// of Omarchy lock screens, not only of submitted ones.
+    /// </remarks>
+    public bool BuiltIn { get; private set; }
+
     public async Task<IActionResult> OnGetAsync(string id)
     {
         var design = await db.Designs
@@ -32,6 +40,7 @@ public class DetailModel(AppDbContext db, IWebHostEnvironment env) : PageModel
         if (design is null || design.Status is not (DesignStatus.Approved or DesignStatus.Unlisted))
             return NotFound();
         Design = design;
+        BuiltIn = design.LiveVersion?.ReviewedBy != Services.RegistrySync.SyncActor;
 
         var dir = Path.Combine(env.WebRootPath, "designs", design.PublicId);
         if (Directory.Exists(dir))

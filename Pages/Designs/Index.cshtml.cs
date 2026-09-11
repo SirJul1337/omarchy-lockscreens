@@ -20,6 +20,9 @@ public class IndexModel(AppDbContext db) : PageModel
     {
         var query = db.Designs
             .AsNoTracking()
+            // The card says whether a design ships with the plugin, and it
+            // reads that off the live version.
+            .Include(d => d.LiveVersion)
             .Where(d => d.Status == DesignStatus.Approved)
             .AsQueryable();
 

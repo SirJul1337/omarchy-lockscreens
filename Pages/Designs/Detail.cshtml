@@ -32,10 +32,17 @@
             <div style="flex: 0 1 400px; min-width: 300px;">
                 <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                     <h1 class="page" style="margin: 0;">@Model.Design.Name</h1>
-                    <span class="verified" style="margin-left: 0;">
-                        <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 8.5 3.5 3.5L13 5"></path></svg>
-                        verified
-                    </span>
+                    @if (Model.BuiltIn)
+                    {
+                        <span class="tagchip">built in</span>
+                    }
+                    else
+                    {
+                        <span class="verified" style="margin-left: 0;">
+                            <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 8.5 3.5 3.5L13 5"></path></svg>
+                            verified
+                        </span>
+                    }
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
                     <a href="https://github.com/@Model.Design.OwnerLogin" rel="noopener" class="mono" style="font-size: 13px;">@("@" + Model.Design.OwnerLogin)</a>
