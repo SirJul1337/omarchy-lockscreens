@@ -177,9 +177,28 @@ app.MapGet("/api/v1/registry.json", async (HttpContext ctx, AppDbContext db) =>
     // resolve a relative path against.
     var origin = $"{ctx.Request.Scheme}://{ctx.Request.Host}";
 
+    // A row this cannot read is skipped, not thrown on. This endpoint is the
+    // plugin's only source of designs, and one malformed FilesJson taking the
+    // whole registry down with a 500 would take every design away from every
+    // user -- which is exactly what a row written by an older version of the
+    // site did, because it records the filename under "path" and not "file".
+    static string? FileName(JsonElement f)
+    {
+        if (f.ValueKind != JsonValueKind.Object) return null;
+        if (f.TryGetProperty("file", out var n) && n.GetString() is { Length: > 0 } s1)
+            return s1;
+        // Older rows carry only a repo-relative path.
+        if (f.TryGetProperty("path", out var p) && p.GetString() is { Length: > 0 } s2)
+            return s2.Split('/').Last();
+        return null;
+    }
+
     var entries = designs.Select(d =>
     {
-        var files = JsonSerializer.Deserialize<JsonElement>(d.LiveVersion!.FilesJson);
+        JsonElement files;
+        try { files = JsonSerializer.Deserialize<JsonElement>(d.LiveVersion!.FilesJson); }
+        catch { return null; }
+
         JsonElement qmlFile = default, previewFile = default;
         if (files.ValueKind == JsonValueKind.Array)
             foreach (var f in files.EnumerateArray())
@@ -188,11 +207,15 @@ app.MapGet("/api/v1/registry.json", async (HttpContext ctx, AppDbContext db) =>
                 if (kind == "preview") previewFile = f; else qmlFile = f;
             }
         var first = qmlFile;
-        var name = first.ValueKind == JsonValueKind.Object
-            ? first.GetProperty("file").GetString() ?? "" : "";
-        var previewName = previewFile.ValueKind == JsonValueKind.Object
-            ? previewFile.GetProperty("file").GetString() : null;
-        return new
+        var name = FileName(first);
+        if (name is null) return null;   // nothing installable: leave it out
+        var previewName = FileName(previewFile);
+
+        var sha = first.TryGetProperty("sha256", out var sh) ? sh.GetString() : null;
+        var size = first.TryGetProperty("size", out var sz) && sz.TryGetInt64(out var bytes)
+            ? bytes : 0L;
+
+        return (object?)new
         {
             id = d.PublicId,
             name = d.Name,
@@ -202,19 +225,19 @@ app.MapGet("/api/v1/registry.json", async (HttpContext ctx, AppDbContext db) =>
             version = d.LiveVersion.Number,
             // The plugin wants one file it can name, hash and check, not a
             // list it has to guess its way through.
-            qml = first.ValueKind == JsonValueKind.Object ? new
+            qml = new
             {
                 file = name,
                 url = $"{origin}/designs/{d.PublicId}/{name}",
-                sha256 = first.GetProperty("sha256").GetString(),
-                size = first.GetProperty("size").GetInt64(),
-            } : null,
+                sha256 = sha,
+                size,
+            },
             preview = previewName is null
                 ? null : $"{origin}/designs/{d.PublicId}/{previewName}",
             likes = d.Likes,
             installs = d.Installs,
         };
-    }).ToList();
+    }).Where(e => e is not null).ToList();
 
     // Deliberately not part of what gets hashed: a timestamp in the payload
     // gives a different ETag on every request, and the conditional GET the

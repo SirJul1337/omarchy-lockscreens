@@ -10,3 +10,6 @@ appsettings.Production.json
 # The registry sync mirrors approved designs here from the designs repo.
 # Generated at runtime -- the designs repo is the source of truth.
 wwwroot/designs/
+
+# Screenshots taken for sharing, not part of the site.
+site-gallery.png

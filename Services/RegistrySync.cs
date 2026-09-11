@@ -31,6 +31,9 @@ public class RegistrySync(
     IWebHostEnvironment env,
     ILogger<RegistrySync> log)
 {
+    /// <summary>Marks the versions this sync created, so it only reconciles its own.</summary>
+    public const string SyncActor = "registry-sync";
+
     /// <summary>Where index.json lives: a URL, or a path for working locally.</summary>
     public string Source => config["Registry:IndexUrl"] ?? "";
 
@@ -164,7 +167,7 @@ public class RegistrySync(
                 FilesJson = JsonSerializer.Serialize(files),
                 ScanReportJson = """[{"level":"ok","text":"reviewed and merged in the designs repository"}]""",
                 ScanVerdict = ScanVerdict.Pass,
-                ReviewedBy = "registry-sync",
+                ReviewedBy = SyncActor,
                 ReviewedUtc = DateTime.UtcNow,
             };
             design.Versions.Add(version);
@@ -176,14 +179,22 @@ public class RegistrySync(
         // Anything the database still lists that the repo no longer has is
         // withdrawn -- but only ever on a sync that actually read the index,
         // never because a fetch failed.
+        //
+        // And only designs this sync put there. The site also lists the
+        // plugin's own built-in designs, which were never in the repository
+        // and so are absent from every index; withdrawing "everything the
+        // index does not mention" would revoke all of them on the first sync
+        // after deploying. The sync reconciles what it owns, and leaves the
+        // rest alone.
         foreach (var (id, design) in existing)
         {
             if (seen.Contains(id) || design.Status != DesignStatus.Approved) continue;
+            if (design.LiveVersion?.ReviewedBy != SyncActor) continue;
             design.Status = DesignStatus.Revoked;
             withdrawn++;
             db.AuditLogs.Add(new AuditLog
             {
-                Actor = "registry-sync",
+                Actor = SyncActor,
                 Action = "withdraw",
                 Detail = $"{id} is no longer in the designs repository",
             });
