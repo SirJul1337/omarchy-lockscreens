@@ -1006,3 +1006,71 @@ footer.site .legal a:hover { color: var(--fg); text-decoration: none; }
   background: var(--yellow);
   vertical-align: middle;
 }
+
+
+/* ------------------------------------------------------ install by hand */
+/* The steps under a design, for while the plugin's own install is not live.
+   The copy button itself is the shared .cmd one, so this is only the list. */
+.byhand {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: byhand;
+  font-size: 13px;
+  color: var(--fg-2);
+}
+
+.byhand li {
+  counter-increment: byhand;
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  padding: 4px 0;
+}
+
+.byhand li::before {
+  content: counter(byhand);
+  flex: none;
+  width: 14px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.byhand kbd {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 1px 6px;
+  color: var(--fg);
+  background: var(--surface-2);
+  box-shadow: var(--t-elevation);
+}
+
+/* The filename row reuses .cmd; `open` sits beside the copy button. */
+.cmd > a {
+  margin-left: auto;
+  flex: none;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.cmd > a:hover { color: var(--accent); }
+.cmd > a + .copy { margin-left: 0; }
+
+
+/* Shown only when the clipboard refused, so the QML can still be selected. */
+pre.revealed {
+  margin-top: 10px;
+  max-height: 320px;
+  overflow: auto;
+  padding: 12px 14px;
+  background: var(--bg-hard);
+  box-shadow: var(--t-elevation);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--fg-2);
+  white-space: pre;
+  -webkit-user-select: all;
+  user-select: all;
+}

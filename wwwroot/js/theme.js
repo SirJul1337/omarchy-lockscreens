@@ -657,16 +657,55 @@
       toggle.setAttribute('aria-expanded', String(open));
     });
 
-    // Copy-the-command boxes, wherever they appear.
-    document.querySelectorAll('.cmd .copy').forEach(function (b) {
+    // Copy buttons, wherever they appear. Matched on data-copy rather than on
+    // an enclosing .cmd, so a button outside one is still wired up.
+    // navigator.clipboard is not always there to be used: it needs a secure
+    // context, and a browser can refuse the write outright. So the old
+    // execCommand path stays as a fallback rather than the button quietly
+    // doing nothing -- which is the one outcome worth avoiding, since the
+    // copy is how a design gets installed at all right now.
+    function legacyCopy(text) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.top = '-1000px';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+      return ok;
+    }
+
+    document.querySelectorAll('.copy[data-copy]').forEach(function (b) {
       b.addEventListener('click', function () {
         var el = document.getElementById(b.dataset.copy);
-        if (!el || !navigator.clipboard) return;
-        navigator.clipboard.writeText(el.textContent.trim()).then(function () {
-          var was = b.textContent;
-          b.textContent = 'copied';
-          setTimeout(function () { b.textContent = was; }, 1200);
-        }).catch(function () {});
+        if (!el) return;
+        // data-raw is a file rather than a command: copy it byte for byte,
+        // since trimming it would drop the trailing newline.
+        var text = b.dataset.raw ? el.textContent : el.textContent.trim();
+
+        var was = b.dataset.label || b.textContent;
+        b.dataset.label = was;
+        function done(ok) {
+          b.textContent = ok ? 'copied' : 'press ctrl+c';
+          if (!ok && el.hidden) {
+            // Nothing could reach the clipboard: show the text so it can be
+            // selected by hand instead of leaving the reader stuck.
+            el.hidden = false;
+            el.classList.add('revealed');
+          }
+          setTimeout(function () { b.textContent = was; }, 1400);
+        }
+
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text)
+            .then(function () { done(true); })
+            .catch(function () { done(legacyCopy(text)); });
+        } else {
+          done(legacyCopy(text));
+        }
       });
     });
   }

@@ -48,12 +48,37 @@
                     }
                 </div>
 
-                <div class="field-label" style="margin: 22px 0 6px;">install — copy the command</div>
+                @* The plugin's one-press install is not live yet, so the route
+                   that works today goes first: the explorer already has a code
+                   editor for hand-written QML, so this is paste-and-save rather
+                   than anything to do in a terminal. *@
+                @if (Model.QmlText is not null)
+                {
+                    <div class="field-label" style="margin: 22px 0 6px;">use it now</div>
+                    <div class="cmd">
+                        <code>@Model.QmlFileName</code>
+                        <a href="/designs/@Model.Design.PublicId/@Model.QmlFileName">open</a>
+                        <button type="button" class="copy" data-copy="qmlsrc" data-raw="1">copy</button>
+                    </div>
+                    <pre id="qmlsrc" hidden>@Model.QmlText</pre>
+                    <ol class="byhand">
+                        <li>in the explorer, press <kbd>N</kbd> for a new design</li>
+                        <li>select all in the editor and paste this over it</li>
+                        <li>save, and it is in your designs</li>
+                    </ol>
+                    <div class="mono" style="font-size: 12px; color: var(--muted); margin-top: 10px;">
+                        Or save it straight to <code>~/.config/omarchy/lock-designs/@Model.QmlFileName</code>
+                        and run <code>omarchy-shell lock rescanDesigns</code>. Nothing to edit either
+                        way — the import is already written for that folder.
+                    </div>
+                }
+
+                <div class="field-label" style="margin: 22px 0 6px;">once the plugin ships</div>
                 <div class="cmd">
                     <code id="installcmd">omarchy-shell lock installCommunity @Model.Design.PublicId</code>
                     <button type="button" class="copy" data-copy="installcmd">copy</button>
                 </div>
-                <div class="mono" style="font-size: 12px; color: var(--muted); margin-top: 8px;">or in the explorer: Community &rarr; @Model.Design.Name &rarr; Enter</div>
+                <div class="mono" style="font-size: 12px; color: var(--muted); margin-top: 8px;">or in the explorer: Community &rarr; @Model.Design.Name &rarr; Enter. Not live yet.</div>
 
                 @if (v is not null)
                 {
