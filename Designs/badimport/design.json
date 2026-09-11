@@ -1,0 +1,6 @@
+{
+  "name": "Bad Import",
+  "author": "SirJul1337",
+  "description": "A test submission that imports a module the gate does not allow.",
+  "tags": ["minimal"]
+}
