@@ -77,16 +77,16 @@
 <section class="zone" style="padding-top: 24px;">
     <div class="wrap">
         <div class="section-heading">
-            <h2>Reviewed, pinned, revocable</h2>
+            <h2>Reviewed, scanned, verified</h2>
             <span class="more">why it is safe to install</span>
         </div>
         <div class="cardgrid">
             <div class="panel">
-                <div class="n">01 — your repo, one commit</div>
+                <div class="n">01 — one repository, in the open</div>
                 <p>
-                    Designs stay in the author's own GitHub repo. Each listing pins one exact
-                    commit — after review, nothing about it can change. Force-push all you like;
-                    the registry does not move.
+                    A design is a pull request that adds one folder here. What the reviewer reads
+                    is what ships, and it stays here afterwards — there is no upstream repository
+                    that can change under it once it is merged.
                 </p>
             </div>
             <div class="panel">
@@ -100,9 +100,10 @@
             <div class="panel">
                 <div class="n">03 — verified on install</div>
                 <p>
-                    The plugin checks every file's SHA-256 against the registry before loading
-                    anything, and re-checks on open — a revoked design is disabled on your machine
-                    within minutes.
+                    The plugin checks the size and SHA-256 against the registry after
+                    downloading, then runs that same scan again on your own machine before the
+                    design is ever loaded. A tampered registry still cannot put a process on your
+                    lock screen.
                 </p>
             </div>
         </div>
