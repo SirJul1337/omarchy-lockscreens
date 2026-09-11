@@ -981,3 +981,28 @@ footer.site .legal a:hover { color: var(--fg); text-decoration: none; }
 }
 .win-tb .dots { display: none; }
 .win-body { padding: 20px; }
+
+
+/* --------------------------------------------------- the not-ready notice */
+/* Under the hero buttons, because installing is the part that does not work
+   yet -- a strip across every page said it louder than it needed to. The dot
+   is inline rather than a flex item, so it stays against the first word
+   instead of drifting off to the left when the text wraps. */
+.hero-note {
+  margin: 18px auto 0;
+  max-width: 34rem;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--muted);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.hero-note .dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 7px;
+  background: var(--yellow);
+  vertical-align: middle;
+}
