@@ -1,0 +1,42 @@
+@page "/apply"
+@model OmarchyLockscreens.Pages.ApplyModel
+@{
+    ViewData["Title"] = "Add your design";
+}
+
+<section class="zone">
+    <div class="wrap" style="max-width: 820px;">
+        <div class="eyebrow">Add your design</div>
+        <h1 class="page">Share your lock screen.</h1>
+        <p class="lede">No account, no sign-up. Adding a design works like the Omarchy plugins directory: you open a GitHub issue, a maintainer reviews it, and it gets listed here. Your files stay in your own repo — the directory just pins the exact commit that was reviewed.</p>
+
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div class="win">
+                <div class="win-tb"><span class="dots"><i></i><i></i><i></i></span><span>how it works</span></div>
+                <div class="win-body" style="display: flex; flex-direction: column; gap: 14px;">
+                    <div style="display: flex; gap: 14px;">
+                        <span class="mono" style="color: var(--accent); font-weight: 700;">1</span>
+                        <div><strong>Open a GitHub issue</strong> with your design's details — repo, the commit to pin, the <span class="mono">.qml</span> file, and up to three tags. The button below opens one pre-filled.</div>
+                    </div>
+                    <div style="display: flex; gap: 14px;">
+                        <span class="mono" style="color: var(--accent); font-weight: 700;">2</span>
+                        <div><strong>It gets scanned and reviewed.</strong> A maintainer runs the automated scan (only QtQuick/QtMultimedia imports, no processes, network or file access, size caps) and reads the code.</div>
+                    </div>
+                    <div style="display: flex; gap: 14px;">
+                        <span class="mono" style="color: var(--accent); font-weight: 700;">3</span>
+                        <div><strong>Approved designs are listed here</strong>, pinned to the reviewed commit, and appear in the plugin's Community tab within minutes.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                <a class="btn" href="@Model.IssueUrl" rel="noopener" target="_blank">Open a GitHub issue</a>
+                <span class="mono" style="font-size: 12px; color: var(--muted);">opens github.com with the fields pre-filled</span>
+            </div>
+
+            <div class="kv">
+                <span style="color: var(--yellow);">rules:</span> your own work, a license that allows redistribution, nothing offensive or deceptive. Updating a listed design is a new issue — the old version stays live until the new one is reviewed. The scanner is what decides "is this technically dangerous"; a human decides the rest.
+            </div>
+        </div>
+    </div>
+</section>

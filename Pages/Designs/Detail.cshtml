@@ -1,0 +1,77 @@
+@page "/d/{id}"
+@using System.Text.Json
+@model OmarchyLockscreens.Pages.Designs.DetailModel
+@{
+    ViewData["Title"] = Model.Design.Name;
+    var v = Model.Design.LiveVersion;
+    var files = v is null ? [] : JsonSerializer.Deserialize<List<Dictionary<string, JsonElement>>>(v.FilesJson) ?? [];
+    long totalSize = files.Sum(f => f.TryGetValue("size", out var s) ? s.GetInt64() : 0);
+    var reportUrl = "https://github.com/SirJul1337/omarchy-lock-explorer/issues/new?title=" +
+        Uri.EscapeDataString($"[report] {Model.Design.Name} ({Model.Design.PublicId})");
+}
+
+<section class="zone">
+    <div class="wrap">
+        <div class="mono" style="font-size: 12.5px; color: var(--muted); margin-bottom: 18px;">
+            <a href="/designs" style="color: var(--muted);">designs</a> / <span style="color: var(--fg);">@Model.Design.Name.ToLowerInvariant()</span>
+        </div>
+
+        @if (Model.Design.Status == OmarchyLockscreens.Models.DesignStatus.Unlisted)
+        {
+            <div class="alert bad">This design is temporarily unlisted while a report is re-reviewed. It is not offered in the plugin right now.</div>
+        }
+
+        <div style="display: flex; gap: 32px; align-items: flex-start; flex-wrap: wrap;">
+            <div style="flex: 1 1 480px; min-width: 320px;">
+                <div class="detail-preview ring" style="aspect-ratio: 16 / 10; background: var(--bg-hard);">
+                    <partial name="_Preview" model="Model.Design" />
+                </div>
+                <div class="mono" style="font-size: 11.5px; color: var(--muted); margin-top: 8px;">representative preview — on your machine the design follows your Omarchy theme and wallpaper</div>
+            </div>
+
+            <div style="flex: 0 1 400px; min-width: 300px;">
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <h1 class="page" style="margin: 0;">@Model.Design.Name</h1>
+                    <span class="verified" style="margin-left: 0;">
+                        <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 8.5 3.5 3.5L13 5"></path></svg>
+                        verified
+                    </span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                    <a href="https://github.com/@Model.Design.OwnerLogin" rel="noopener" class="mono" style="font-size: 13px;">@("@" + Model.Design.OwnerLogin)</a>
+                </div>
+                <p style="color: var(--muted); margin: 14px 0 0;">@Model.Design.Description</p>
+                <div class="chips" style="margin-top: 12px;">
+                    @foreach (var tag in Model.Design.TagList)
+                    {
+                        <span class="tagchip">@tag</span>
+                    }
+                </div>
+
+                <div class="field-label" style="margin: 22px 0 6px;">install — copy the command</div>
+                <div class="cmd">
+                    <code id="installcmd">omarchy-shell lock installCommunity @Model.Design.PublicId</code>
+                    <button type="button" class="copy" data-copy="installcmd">copy</button>
+                </div>
+                <div class="mono" style="font-size: 12px; color: var(--muted); margin-top: 8px;">or in the explorer: Community &rarr; @Model.Design.Name &rarr; Enter</div>
+
+                @if (v is not null)
+                {
+                    <div class="kv" style="margin-top: 20px;">
+                        <div><span>version</span><span>@v.Number</span></div>
+                        <div><span>source</span><a href="@v.RepoUrl" rel="noopener">@v.RepoUrl.Replace("https://github.com/", "")</a></div>
+                        <div><span>pinned commit</span><a href="@(v.RepoUrl)/tree/@v.CommitSha" rel="noopener">@v.CommitSha[..7]</a></div>
+                        <div><span>kind</span><span>@Model.Design.Kind.ToString().ToLowerInvariant() · @(totalSize > 1024 * 1024 ? $"{totalSize / (1024.0 * 1024.0):0.0} MB" : $"{totalSize / 1024.0:0.0} KB")</span></div>
+                        <div><span>added</span><span>@v.ReviewedUtc?.ToString("yyyy-MM-dd")</span></div>
+                    </div>
+                }
+
+                <div class="mono" style="font-size: 12px; color: var(--muted); margin-top: 14px;">
+                    Files are verified by SHA-256 on install. Something wrong? <a href="@reportUrl" rel="noopener" style="color: var(--red);">Report it on GitHub</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@* The copy handler is global now — js/theme.js wires every .cmd .copy. *@

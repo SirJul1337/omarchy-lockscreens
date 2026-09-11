@@ -1,0 +1,110 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "";
+}
+
+@* The hero borrows omarchy.org's shape: a pixel field, the wordmark cut from
+   the theme's field gradient, one mono line of copy, two buttons. *@
+<section class="field field-hero" style="padding: 88px 0 96px;">
+    <div class="wrap" style="text-align: center;">
+        <div class="page-wordmark" role="img" aria-label="Lockscreens"></div>
+        <p class="page-subtitle">Community lock screens for Omarchy</p>
+
+        <p class="lede" style="margin: 28px auto 0; max-width: 40rem; text-wrap: balance;">
+            Browse and install lock screens made by other Omarchy users.<br />
+            Reviewed by hand, pinned to a commit, one keypress away in the explorer.
+        </p>
+
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 32px;">
+            <a class="btn" href="/designs">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 5h16v14H4z" /><path d="M4 9h16" /></svg>
+                Browse lockscreens
+            </a>
+            <a class="btn ghost" href="#install">Install the plugin</a>
+        </div>
+    </div>
+</section>
+
+@if (Model.Featured.Count > 0)
+{
+    <section class="zone" style="padding-bottom: 24px;">
+        <div class="wrap">
+            <div class="section-heading">
+                <h2>Recently added</h2>
+                <a href="/designs" class="more">all @Model.DesignCount lockscreens &rarr;</a>
+            </div>
+            <div class="cardgrid">
+                @foreach (var d in Model.Featured)
+                {
+                    <partial name="_DesignCard" model="d" />
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<section class="zone" id="install">
+    <div class="wrap">
+        <div class="section-heading">
+            <h2>Install</h2>
+        </div>
+        <div style="display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-start;">
+            <div style="flex: 1 1 380px; min-width: 300px;">
+                <p class="lede">
+                    Lockscreens are installed by the Lock Screen Explorer plugin — it fetches the
+                    registry, verifies every file, and drops the design straight into your picker.
+                </p>
+                <div class="chips" style="margin-top: 20px;">
+                    <span class="tagchip">Omarchy Quattro</span>
+                    <span class="tagchip">no account needed</span>
+                    <span class="tagchip">SHA-256 verified</span>
+                </div>
+            </div>
+            <div class="term" style="flex: 1 1 440px; min-width: 320px;">
+                <div class="c"># already running the Lock Screen Explorer?</div>
+                <div><span class="p">$</span> omarchy-shell lock explore</div>
+                <div class="c">&rarr; Community tab, pick one, Enter. Done.</div>
+                <div style="height: 14px;"></div>
+                <div class="c"># not yet?</div>
+                <div style="overflow-wrap: anywhere;"><span class="p">$</span> omarchy plugin add https://github.com/SirJul1337/omarchy-lock-explorer.git --enable</div>
+                <div><span class="p">$</span> omarchy restart shell</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="zone" style="padding-top: 24px;">
+    <div class="wrap">
+        <div class="section-heading">
+            <h2>Reviewed, pinned, revocable</h2>
+            <span class="more">why it is safe to install</span>
+        </div>
+        <div class="cardgrid">
+            <div class="panel">
+                <div class="n">01 — your repo, one commit</div>
+                <p>
+                    Designs stay in the author's own GitHub repo. Each listing pins one exact
+                    commit — after review, nothing about it can change. Force-push all you like;
+                    the registry does not move.
+                </p>
+            </div>
+            <div class="panel">
+                <div class="n">02 — scanned, then human eyes</div>
+                <p>
+                    An automated scan checks every file: no processes, no network calls, no file
+                    access, sane sizes. Then a human reviews the code before anything goes live.
+                    No exceptions.
+                </p>
+            </div>
+            <div class="panel">
+                <div class="n">03 — verified on install</div>
+                <p>
+                    The plugin checks every file's SHA-256 against the registry before loading
+                    anything, and re-checks on open — a revoked design is disabled on your machine
+                    within minutes.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>

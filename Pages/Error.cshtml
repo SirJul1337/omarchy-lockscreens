@@ -1,0 +1,29 @@
+@page
+@model ErrorModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+<section class="zone">
+    <div class="wrap" style="max-width: 44rem;">
+        <div class="eyebrow">Something broke</div>
+        <h1 class="page">An error occurred.</h1>
+        <p class="lede" style="margin-top: 12px;">
+            The request could not be processed. If it keeps happening,
+            <a href="https://github.com/SirJul1337/omarchy-lock-explorer/issues" rel="noopener">open an issue</a>
+            — the request id below helps.
+        </p>
+
+        @if (Model.ShowRequestId)
+        {
+            <div class="kv" style="margin-top: 24px;">
+                <div><span>request id</span><span>@Model.RequestId</span></div>
+            </div>
+        }
+
+        <div style="display: flex; gap: 12px; margin-top: 28px;">
+            <a class="btn" href="/designs">Browse lockscreens</a>
+            <a class="btn ghost" href="/">Home</a>
+        </div>
+    </div>
+</section>

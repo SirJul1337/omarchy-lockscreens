@@ -1,0 +1,172 @@
+@{
+    var isAdmin = User.IsInRole("admin");
+    var path = Context.Request.Path.Value ?? "/";
+    string Here(string prefix) => path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ? "here" : "";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>@(ViewData["Title"] is string t && t.Length > 0 ? t + " — Omarchy Lockscreens" : "Omarchy Lockscreens")</title>
+    <meta name="description" content="A community directory of lock screen designs for Omarchy — reviewed, pinned to a commit, and one keypress away in the Lock Screen Explorer." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="mask-icon" href="/favicon.svg" color="#9ece6a" />
+    <meta name="theme-color" content="#1a1b26" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    @* JetBrains Mono is the body face and Geist carries names and prose — the
+       same pairing omarchy.org uses. *@
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,400..700;1,400&display=swap" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/theme-transition.css" asp-append-version="true" />
+    @* Set the stored theme before first paint, or the page flashes Tokyo Night
+       on its way to whatever the visitor picked. *@
+    <script>
+        try {
+            var k = localStorage.getItem('omarchy-theme');
+            if (k) document.documentElement.dataset.theme = k;
+        } catch (e) {}
+    </script>
+</head>
+<body>
+    <header class="bar">
+        <div class="bar-inner">
+            <a class="mark" href="/" aria-label="Omarchy Lockscreens home">
+                <span class="mark-glyph" aria-hidden="true"></span>
+                <span class="wordmark">Lockscreens</span>
+            </a>
+
+            @if (isAdmin)
+            {
+                <span class="adminbadge">ADMIN</span>
+            }
+
+            <nav aria-label="Main">
+                <a href="/designs" class="@Here("/designs")">Lockscreens</a>
+                <a href="/apply" class="@Here("/apply")">Submit</a>
+                @if (isAdmin)
+                {
+                    <a href="/review" class="@Here("/review")">Review</a>
+                }
+                <a href="https://omarchy.org" rel="noopener">Omarchy</a>
+            </nav>
+
+            <div class="bar-right">
+                <div class="bar-icons">
+                    <div class="picker" id="themePicker">
+                        <button type="button" class="iconbtn" id="themeBtn" aria-label="Change the theme" aria-expanded="false" aria-haspopup="menu">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                                <path d="M12 3a9 9 0 1 0 0 18c.9 0 1.5-.7 1.5-1.5 0-.4-.2-.8-.4-1.1-.3-.3-.4-.6-.4-1 0-.8.7-1.4 1.5-1.4H16a5 5 0 0 0 5-5c0-4.4-4-8-9-8Z" />
+                                <circle cx="7.5" cy="11.5" r="1.2" fill="currentColor" stroke="none" />
+                                <circle cx="10.5" cy="7.5" r="1.2" fill="currentColor" stroke="none" />
+                                <circle cx="15" cy="8" r="1.2" fill="currentColor" stroke="none" />
+                            </svg>
+                        </button>
+
+                    </div>
+                    <a class="iconbtn" href="https://github.com/SirJul1337/omarchy-lock-explorer" rel="noopener" aria-label="The plugin on GitHub">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 2C6.5 2 2 6.6 2 12.3c0 4.5 2.9 8.3 6.8 9.7.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.4-3.4-1.4-.4-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.6 2.4 1.1 3 .9.1-.7.3-1.1.6-1.4-2.2-.3-4.6-1.2-4.6-5.1 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.7-.3 2.5-.3s1.7.1 2.5.3c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.3 4.8-4.6 5.1.4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5 3.9-1.4 6.8-5.2 6.8-9.7C22 6.6 17.5 2 12 2Z" />
+                        </svg>
+                    </a>
+                </div>
+
+                @if (isAdmin)
+                {
+                    <form method="post" action="/admin/logout" style="display:inline">
+                        <button type="submit" class="btn ghost sm">Sign out</button>
+                    </form>
+                }
+                else
+                {
+                    <a class="btn sm" href="/#install">Install</a>
+                }
+
+                <button type="button" class="iconbtn bar-toggle" id="navToggle" aria-label="Menu" aria-expanded="false" aria-controls="navDrawer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path d="M4 7h16M4 12h16M4 17h16" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="drawer" id="navDrawer">
+            <nav aria-label="Main">
+                <a href="/designs" class="@Here("/designs")">Lockscreens</a>
+                <a href="/apply" class="@Here("/apply")">Submit</a>
+                @if (isAdmin)
+                {
+                    <a href="/review" class="@Here("/review")">Review</a>
+                }
+                <a href="https://omarchy.org" rel="noopener">Omarchy</a>
+                <a href="https://github.com/SirJul1337/omarchy-lock-explorer" rel="noopener">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer class="site field">
+        <div class="inner">
+            <div class="cols">
+                <div class="about">
+                    <a class="fmark" href="/">Omarchy Lockscreens</a>
+                    <p>
+                        A community directory of lock screen designs for Omarchy. Every design is
+                        reviewed by hand, pinned to the exact commit that was reviewed, and one
+                        keypress away in the Lock Screen Explorer.
+                    </p>
+                </div>
+
+                <div class="col">
+                    <h2>Browse</h2>
+                    <a href="/designs">All lockscreens</a>
+                    <a href="/designs?tag=minimal">Minimal</a>
+                    <a href="/designs?tag=motion">Motion</a>
+                    <a href="/#install">Install the plugin</a>
+                </div>
+
+                <div class="col">
+                    <h2>Contribute</h2>
+                    <a href="/apply">Submit a design</a>
+                    <a href="https://github.com/SirJul1337/omarchy-lock-explorer" rel="noopener">The plugin</a>
+                    <a href="https://github.com/SirJul1337/omarchy-lock-explorer/issues" rel="noopener">Issues</a>
+                </div>
+
+                <div class="col">
+                    <h2>Omarchy</h2>
+                    <a href="https://omarchy.org" rel="noopener">omarchy.org</a>
+                    <a href="https://plugins.omarchy.org" rel="noopener">Plugins</a>
+                    <a href="https://omarchy.org/themes" rel="noopener">Themes</a>
+                    <a href="https://omarchy.org/manual" rel="noopener">Manual</a>
+                </div>
+            </div>
+
+            <div class="legal">
+                <span>omarchycommunity.org</span>
+                <span>Not affiliated with Omarchy.</span>
+                <span>Every design is reviewed and pinned to its reviewed commit.</span>
+            </div>
+        </div>
+    </footer>
+
+    @* The wordmark bitmap: the same cells the mask is cut from, so the field
+       can draw the word and animate it. Generated by scripts/build-wordmark.py. *@
+    @* The theme picker: omarchy.org's coverflow of sheared cards, each one
+       rendering itself live in its own palette. *@
+    <div class="picker-modal" id="themeMenu" role="dialog" aria-modal="true" aria-label="Theme picker" hidden>
+        <div class="picker-dim" aria-hidden="true"></div>
+        <div class="picker-stage" id="themeStage"></div>
+        <div class="picker-name" id="themeName" aria-live="polite"></div>
+        <div class="picker-hint">&larr; &rarr; to browse &nbsp;·&nbsp; Enter to keep &nbsp;·&nbsp; Esc to close</div>
+    </div>
+
+    <script src="~/js/wordmark-bitmap.js" asp-append-version="true"></script>
+    <script src="~/js/etch.js" asp-append-version="true"></script>
+    <script src="~/js/theme.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

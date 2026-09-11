@@ -1,0 +1,11 @@
+ttfx — terminal text effects, compiled to WebAssembly.
+
+  https://github.com/omacom/ttfx
+
+MIT licensed. ttfx is a Rust port of TerminalTextEffects by ChrisBuilds
+(https://github.com/ChrisBuilds/terminaltexteffects), also MIT; both
+copyrights are preserved in that repository's LICENSE and NOTICE.
+
+Vendored here unmodified (ttfx.js, ttfx.d.ts and the all.wasm effects
+build) so the wordmark can be drawn by the same engine omarchy.org uses.
+Loaded lazily, only when someone clicks the wordmark.

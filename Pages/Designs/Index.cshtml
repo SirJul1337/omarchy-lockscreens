@@ -1,0 +1,56 @@
+@page "/designs"
+@model OmarchyLockscreens.Pages.Designs.IndexModel
+@{
+    ViewData["Title"] = "Lockscreens";
+}
+
+<section class="zone">
+    <div class="wrap">
+        @* omarchy.org's themes page: wordmark, one tracked line, one sentence
+           saying where this lives on your machine, one outbound link. Then the
+           grid, with nothing left competing with it. *@
+        <header class="page-heading">
+            <div class="page-wordmark" role="img" aria-label="Lockscreens"></div>
+            <h1 class="page-subtitle">Community lock screens</h1>
+            <p class="page-lede">
+                Make it yours:
+                <span class="step">Install the plugin</span> →
+                <span class="step">Community</span> →
+                <span class="step">Enter</span>
+            </p>
+            <p class="page-lede">
+                <a href="/apply">Share your design <span aria-hidden="true">↗</span></a>
+            </p>
+        </header>
+
+        <div class="listbar">
+            <form method="get" class="listbar-search">
+                <input type="hidden" name="tag" value="@Model.Tag" />
+                <input type="search" name="q" value="@Model.Q" placeholder="search lockscreens…" aria-label="Search lock screens" />
+                <button type="submit" name="sort" value="recent" class="chip @(Model.Sort != "az" ? "on" : "")">Recent</button>
+                <button type="submit" name="sort" value="az" class="chip @(Model.Sort == "az" ? "on" : "")">A–Z</button>
+            </form>
+
+            <div class="chips listbar-tags">
+                @foreach (var c in OmarchyLockscreens.Pages.Designs.IndexModel.Categories)
+                {
+                    var on = (Model.Tag ?? "all") == c;
+                    <a class="chip @(on ? "on" : "")" href="/designs?tag=@c&sort=@Model.Sort&q=@Model.Q">@System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(c)</a>
+                }
+            </div>
+        </div>
+
+        <div class="cardgrid">
+            @foreach (var d in Model.Designs)
+            {
+                <partial name="_DesignCard" model="d" />
+            }
+        </div>
+        @if (Model.Designs.Count == 0)
+        {
+            <p class="empty-note">
+                Nothing here yet — <a href="/apply">add the first one</a>.
+            </p>
+        }
+    </div>
+</section>

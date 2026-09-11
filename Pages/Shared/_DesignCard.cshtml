@@ -1,0 +1,11 @@
+@model OmarchyLockscreens.Models.Design
+@* omarchy.org's theme card: the screenshot is the card. No panel, no padding,
+   no badge — a hairline round the image and one quiet line under it. *@
+<a class="dcard" href="/d/@Model.PublicId">
+    <div class="thumb">
+        <partial name="_Preview" model="Model" />
+    </div>
+    <span class="dcard-label">
+        @Model.Name<span class="dcard-by">@("@" + Model.OwnerLogin)</span>
+    </span>
+</a>

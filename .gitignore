@@ -1,0 +1,12 @@
+bin/
+obj/
+publish/
+App_Data/
+*.db
+*.db-shm
+*.db-wal
+appsettings.Production.json
+
+# The registry sync mirrors approved designs here from the designs repo.
+# Generated at runtime -- the designs repo is the source of truth.
+wwwroot/designs/

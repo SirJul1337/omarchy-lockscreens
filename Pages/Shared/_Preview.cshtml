@@ -1,0 +1,46 @@
+@model OmarchyLockscreens.Models.Design
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
+@{
+    // A design's screenshot is the only way anyone can see what it looks like
+    // before installing it, so this tries hard to find one.
+    //
+    // First the copy the registry sync mirrored out of the designs repository,
+    // wwwroot/designs/<id>/preview.*, which is where every submitted design
+    // lands. Then the older hand-captured wwwroot/previews/<slug>.jpg, for the
+    // built-ins that predate the sync. A placeholder only when there is
+    // genuinely nothing.
+    string? src = null;
+    var mirrored = System.IO.Path.Combine(Env.WebRootPath, "designs", Model.PublicId);
+    if (System.IO.Directory.Exists(mirrored))
+    {
+        var found = System.IO.Directory.EnumerateFiles(mirrored)
+            .FirstOrDefault(f => f.EndsWith(".png", StringComparison.OrdinalIgnoreCase)
+                              || f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase)
+                              || f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase));
+        if (found is not null)
+            src = $"/designs/{Model.PublicId}/{System.IO.Path.GetFileName(found)}";
+    }
+    if (src is null)
+    {
+        var slug = Model.PublicId.Split('.').Last();
+        if (System.IO.File.Exists(System.IO.Path.Combine(Env.WebRootPath, "previews", slug + ".jpg")))
+            src = $"/previews/{slug}.jpg";
+    }
+    var wall = "linear-gradient(180deg, color-mix(in srgb, var(--wall-a) 72%, var(--bg-hard)), var(--bg-hard))";
+}
+<div class="pv">
+    @if (src is not null)
+    {
+        <img class="pv-img" src="@src" alt="@Model.Name lock screen" loading="lazy" />
+    }
+    else
+    {
+        <div class="pv-fill" style="background:@wall; display:grid; place-items:center;">
+            <div class="pvclock" style="position:static;">16:57</div>
+        </div>
+    }
+    @if (Model.Kind == OmarchyLockscreens.Models.DesignKind.Video)
+    {
+        <span class="pv-video">VIDEO</span>
+    }
+</div>
