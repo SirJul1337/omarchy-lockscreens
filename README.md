@@ -82,6 +82,12 @@ repository is on its own enough to put code on someone's lock screen.
   `Services/GitHubContentService.cs`, `Services/ScanService.cs`) predates the
   pull request flow and is a second way in. One of the two should go.
 
+## Licence
+
+MIT, see [LICENSE](LICENSE). Designs are contributed under the same licence.
+The vendored ttfx engine under `wwwroot/ttfx/` is MIT as well, with its
+attribution in `wwwroot/ttfx/NOTICE`.
+
 ## Deploying
 
 See [DEPLOY.md](DEPLOY.md) — self-contained win-x86 to Simply.com, plus the
