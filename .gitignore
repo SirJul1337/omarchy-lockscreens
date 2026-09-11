@@ -17,3 +17,8 @@ site-gallery.png
 # Deployment artifacts, built on demand.
 publish-deploy/
 deploy.zip
+
+# Visual Studio local state.
+.vs/
+*.user
+*.suo
