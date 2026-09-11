@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "generated": "2026-09-11T17:30:36Z",
+  "designs": [
+    {
+      "id": "ribbon",
+      "name": "Ribbon",
+      "author": "SirJul1337",
+      "description": "One band straight across the middle: clock on the left, greeting in the centre, field on the right.",
+      "tags": [
+        "minimal",
+        "cards"
+      ],
+      "qml": {
+        "path": "Designs/ribbon/Ribbon.qml",
+        "sha256": "7aa34240a9c730d0e33b660fc5ce9938532b5ba2a293c14eb4d1e8f03bcbfde5",
+        "size": 2849
+      },
+      "preview": {
+        "path": "Designs/ribbon/preview.jpg",
+        "sha256": "0d3ca2c2fba5bdbdb5eaa8adc8b6070a37a4734a54d7f6d61d86735be96951c5",
+        "size": 76625
+      }
+    },
+    {
+      "id": "slate",
+      "name": "Slate",
+      "author": "SirJul1337",
+      "description": "No wallpaper at all \u2014 a flat gradient in the theme's own colours, with the clock and sign-in down the left.",
+      "tags": [
+        "minimal",
+        "dark"
+      ],
+      "qml": {
+        "path": "Designs/slate/Slate.qml",
+        "sha256": "2fc613adce6e22784e5f39963bd66f38f153044ae7253c263f3cd8adc893c535",
+        "size": 3191
+      },
+      "preview": {
+        "path": "Designs/slate/preview.jpg",
+        "sha256": "4dd1c30057dd7fa3b9c076d5163a0b40089436be7e1ff0199c2426ae282be100",
+        "size": 20025
+      }
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+name: check design
+
+# A design submission is a pull request adding one folder under Designs/.
+# This is the automated half of the gate; a maintainer still reads the QML
+# before merging, and the plugin runs the same scan again locally before it
+# ever loads a downloaded design.
+on:
+  pull_request:
+    paths:
+      - 'Designs/**'
+      - 'scripts/scan.py'
+      - 'scripts/build-index.py'
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # This repository is the site as well as the designs, so a pull request
+      # touching anything outside Designs/ is a change to the site itself --
+      # fine from a maintainer, but not a plain design submission, and it is
+      # worth saying so rather than letting a green tick imply otherwise.
+      - name: Work out what changed
+        id: changed
+        run: |
+          base='${{ github.event.pull_request.base.sha }}'
+          files=$(git diff --name-only "$base"...HEAD)
+          echo "$files" | sed 's/^/  /'
+          outside=$(echo "$files" | grep -v '^Designs/' || true)
+          if [ -n "$outside" ]; then
+            echo "This pull request touches files outside Designs/:"
+            echo "$outside" | sed 's/^/  /'
+            echo "That is fine for a maintainer, but it is not a plain design submission."
+          fi
+          dirs=$(echo "$files" | grep '^Designs/' | cut -d/ -f1,2 | sort -u)
+          echo "dirs<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$dirs" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      # Take the gate from the base branch, not from the pull request. A
+      # submission that edited scripts/scan.py would otherwise be scanned by
+      # its own copy of the scanner, which is no gate at all.
+      - name: Use the reviewed scanner, not the submitted one
+        run: |
+          git checkout '${{ github.event.pull_request.base.sha }}' -- scripts/scan.py scripts/build-index.py
+          git status --short scripts/
+
+      - name: Scan
+        run: |
+          fail=0
+          while read -r d; do
+            [ -n "$d" ] || continue
+            if [ ! -d "$d" ]; then
+              echo "$d was removed — nothing to scan."
+              continue
+            fi
+            python scripts/scan.py "$d" || fail=1
+          done <<< '${{ steps.changed.outputs.dirs }}'
+          exit $fail
+
+      # scan.py has already checked this design's own design.json. This runs
+      # the generator over the whole repository, so a submission that would
+      # break index.json for everyone else fails here rather than on main --
+      # index.json is what the site syncs from, so a broken one stops every
+      # design updating, not just this one.
+      - name: Build the index
+        run: |
+          python scripts/build-index.py
+          git diff --stat -- index.json

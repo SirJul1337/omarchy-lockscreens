@@ -1,0 +1,55 @@
+name: publish the index
+
+# index.json is the handover from the reviewed files to the running site: the
+# site polls it, reconciles it against its database and mirrors the files it
+# names. So it has to be regenerated whenever a design lands, and committed,
+# because the site fetches it from the repository rather than from the copy
+# deployed alongside it -- which means a merged design goes live on the next
+# poll, with no redeploy.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Designs/**'
+      - 'scripts/build-index.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-index
+  cancel-in-progress: false
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build index.json
+        run: python scripts/build-index.py
+
+      # Only commit a real change. The generated timestamp moves on every run,
+      # so committing unconditionally would add an empty commit every time --
+      # and this push would not retrigger the workflow anyway (the paths filter
+      # above excludes index.json), but an honest history is worth more.
+      - name: Commit it if the designs changed
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git diff --quiet -- index.json; then
+            echo 'index.json is already up to date.'
+            exit 0
+          fi
+          if [ -z "$(git diff --numstat -- index.json | awk '$1 > 1 || $2 > 1')" ]; then
+            echo 'Only the generated timestamp moved -- nothing to publish.'
+            git checkout -- index.json
+            exit 0
+          fi
+          git add index.json
+          git commit -m 'Rebuild index.json'
+          git push

@@ -1,4 +1,4 @@
-# Deploying omarchylockscreens.com to Simply.com
+# Deploying omarchycommunity.org to Simply.com
 
 This is an ASP.NET Core 10 Razor Pages app, published **self-contained for
 win-x86** so Simply.com's shared Windows hosting can run it without any .NET
@@ -7,7 +7,7 @@ install on the server (their documented path — support articles 361 and 828).
 ## 1. What to upload
 
 Everything in the **`publish/`** folder (produced by the command below) goes
-into your webhotel's `public_html` for omarchylockscreens.com. Rebuild it any
+into your webhotel's `public_html` for omarchycommunity.org. Rebuild it any
 time with:
 
 ```
@@ -51,8 +51,8 @@ Create/edit **`appsettings.Production.json`** in the site root on the server
 
 At <https://github.com/settings/developers> → New OAuth App:
 
-- Homepage URL: `https://omarchylockscreens.com`
-- Authorization callback URL: `https://omarchylockscreens.com/signin-github`
+- Homepage URL: `https://omarchycommunity.org`
+- Authorization callback URL: `https://omarchycommunity.org/signin-github`
 
 Copy the Client ID and generate a Client Secret into
 `appsettings.Production.json` as above. The app requests **no scopes** — only
@@ -70,13 +70,13 @@ so a CDN protects the origin with **zero app changes**. Simply.com has no free
 CDN of its own (its Varnish/Redis caching is on Pro/Enterprise plans), so use
 Cloudflare's free tier:
 
-1. Add `omarchylockscreens.com` to a **free** Cloudflare account.
+1. Add `omarchycommunity.org` to a **free** Cloudflare account.
 2. Change the domain's nameservers (in the Simply control panel) to the two
    Cloudflare gives you. DNS stays free.
 3. Point an **A record** for `@` (and `www`) at your Simply webhotel's IP,
    **proxied** (orange cloud on).
 4. Cloudflare honours the app's `Cache-Control` automatically. Optionally add a
-   Cache Rule for `omarchylockscreens.com/api/v1/*` → *Eligible for cache* to be
+   Cache Rule for `omarchycommunity.org/api/v1/*` → *Eligible for cache* to be
    explicit. That's it — reads now hit Cloudflare's edge, not Simply.
 5. **Lock the origin** so nobody bypasses the cache/WAF: once traffic flows
    through Cloudflare, restrict the Simply site to Cloudflare's published IP
@@ -110,8 +110,8 @@ briefly is harmless because the plugin fails open on its cached copy.
 
 ## 6. Health check after deploy
 
-- `https://omarchylockscreens.com/` — landing page renders.
-- `https://omarchylockscreens.com/api/v1/registry.json` — returns JSON with the
+- `https://omarchycommunity.org/` — landing page renders.
+- `https://omarchycommunity.org/api/v1/registry.json` — returns JSON with the
   cache header (empty `designs` array until something is approved).
 - Sign in with GitHub, submit a design, approve it at `/review`, confirm it
   appears in the registry within the cache window.

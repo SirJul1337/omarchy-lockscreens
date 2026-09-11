@@ -1,0 +1,20 @@
+# Default: normalise text in the repository, check out native.
+* text=auto
+
+# The design files are hashed, and the hash in index.json is what the site and
+# the plugin both verify against. So their bytes have to be identical on every
+# machine that touches them -- a Windows checkout turning LF into CRLF would
+# change the hash, and the design would then be refused by the very check that
+# is supposed to protect it. Pin them to LF everywhere, and never let git
+# rewrite the previews.
+Designs/**/*.qml    text eol=lf
+Designs/**/*.json   text eol=lf
+Designs/**/*.png    binary
+Designs/**/*.jpg    binary
+Designs/**/*.jpeg   binary
+index.json          text eol=lf
+
+# Run on Linux, in CI or on the Omarchy machine.
+*.sh                text eol=lf
+*.py                text eol=lf
+*.yml               text eol=lf
